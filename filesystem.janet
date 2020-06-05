@@ -11,7 +11,7 @@
 (defn exists?
   "Check if the given file or directory exists."
   [path]
-  (if (os/stat path) true false))
+  (not (nil? (os/stat path))))
 
 (defn each-subpath
   "Apply a function on each subpath leading to the given path."
