@@ -32,4 +32,7 @@
 (os/rm new-test-file)
 (aef (filesystem/exists? new-test-file))
 
+(filesystem/recreate-directory "test/files/")
+(aet (filesystem/exists? "test/files/"))
+
 (filesystem/remove-directories "test/files/")

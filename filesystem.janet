@@ -74,8 +74,7 @@
 (defn recreate-directory
   "Remove the directory if it exists, then create it again."
   [dir]
-  (scan-directory dir (fn [file] (os/rm file)))
-  (try (os/rm dir) ([err] nil))
+  (remove-directories dir)
   (os/mkdir dir))
 
 # ------------------------------------------------------------------------------
