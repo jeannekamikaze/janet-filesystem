@@ -48,7 +48,8 @@
 
 (defn list-all-files
   "List the files in the given directory recursively. Return the paths to all
-  files found, relative to the given directory."
+  files found, relative to the current working directory if the given path is a
+  relative path, or as an absolute path otherwise."
   [dir]
   (def files @[])
   (scan-directory dir (fn [file]
@@ -64,6 +65,12 @@
       (when (not (exists? subpath))
         (os/mkdir subpath)))))
 
+(defn remove-directories
+  "Remove a directory recursively."
+  [dir]
+  (scan-directory dir (fn [file] (os/rm file)))
+  (try (os/rm dir) ([err] nil)))
+
 (defn recreate-directory
   "Remove the directory if it exists, then create it again."
   [dir]
@@ -75,15 +82,23 @@
 # Files.
 # ------------------------------------------------------------------------------
 
-(defn create-file
+(defmacro with-file
   "Create and open a file, creating all the directories leading to the file if
-  they do not exist. It is the caller's responsibility to close the file
-  afterwards."
-  [path &opt mode]
-  (def parent-path (path/dirname path))
-  (when (and (not (exists? path)) (not (exists? parent-path)))
-    (create-directories parent-path))
-  (file/open path mode))
+  they do not exist, apply the given body on the file resource, and then close
+  the file."
+  [[binding path mode] & body]
+  ~(do
+    (def parent-path (path/dirname ,path))
+    (when (and (not (exists? ,path)) (not (exists? parent-path)))
+      (create-directories parent-path))
+    (def ,binding (file/open ,path ,mode))
+    ,(apply defer [:close binding] body)))
+
+(defn create-file
+  "Create a file, as well as all the directories leading to it if they do not
+  exist."
+  [path]
+  (with-file [f path :wb] nil))
 
 (defn read-file
   "Read the entire file into a buffer."
@@ -96,7 +111,7 @@
 (defn write-file
   "Write a buffer to a file."
   [path buf]
-  (with [file (create-file path :wb)]
+  (with-file [file path :wb]
     (file/write file buf)))
 
 (defn copy-file
@@ -106,7 +121,7 @@
   (def buf-size 4096)
   (def buf (buffer/new buf-size))
   (with [src (file/open src-path :rb)]
-    (with [dst (create-file dst-path :wb)]
+    (with-file [dst dst-path :wb]
       (while (def bytes (file/read src buf-size buf))
         (file/write dst bytes)
         (buffer/clear buf)))))
