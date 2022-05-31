@@ -18,21 +18,74 @@
   [x]
   (aeq x false))
 
-(filesystem/create-file "test/files/hello.txt")
-(filesystem/create-file "test/files/subdir/world.txt")
+(defn run-test
+  "Create the test directory, run the test and clean up."
+  [test]
+  (def test-directory "tmp")
+  (filesystem/recreate-directories test-directory)
+  (test)
+  (filesystem/remove-directories test-directory))
 
-(aet (filesystem/exists? "test/files/hello.txt"))
+# Check the test harness before running other tests.
+# tests exists? for existent directories.
+(run-test (fn []
+  (aet (filesystem/exists? "tmp/"))))
+(aef (filesystem/exists? "tmp/"))
+
+# exists? for non-existent files/directories.
 (aef (filesystem/exists? "does/not/exist"))
-(aeq (filesystem/list-all-files "test/files/")
-     @["test/files/subdir/world.txt" "test/files/hello.txt"])
 
-(def new-test-file "test/files/new.txt")
-(filesystem/create-file new-test-file)
-(aet (filesystem/exists? new-test-file))
-(os/rm new-test-file)
-(aef (filesystem/exists? new-test-file))
+# create-file and exists? for existent files.
+(run-test (fn []
+  (filesystem/create-file "tmp/files/hello.txt")
+  (aet (filesystem/exists? "tmp/files/hello.txt"))))
 
-(filesystem/recreate-directory "test/files/")
-(aet (filesystem/exists? "test/files/"))
+# list-all-files
+(run-test (fn []
+  (filesystem/create-file "tmp/files/hello.txt")
+  (filesystem/create-file "tmp/files/subdir/world.txt")
+  (aeq (filesystem/list-all-files "tmp/files/")
+      @["tmp/files/subdir/world.txt" "tmp/files/hello.txt"])))
 
-(filesystem/remove-directories "test/files/")
+# create-directories
+(run-test (fn []
+  (def test-dirs "tmp/a/b/c")
+  (filesystem/create-directories test-dirs)
+  (aet (filesystem/exists? test-dirs))))
+
+# remove-directories
+(run-test (fn []
+  (def test-dirs "tmp/a/b/c")
+  (filesystem/create-directories test-dirs)
+  (aet (filesystem/exists? test-dirs))
+  (filesystem/remove-directories test-dirs)
+  (aef (filesystem/exists? test-dirs))))
+
+# recreate-directories, empty case
+(run-test (fn []
+  (def test-dirs "tmp/a/b/c")
+  (filesystem/recreate-directories test-dirs)
+  (aet (filesystem/exists? test-dirs))))
+
+# create-file
+(run-test (fn []
+  (def new-test-file "tmp/files/new.txt")
+  (filesystem/create-file new-test-file)
+  (aet (filesystem/exists? new-test-file))))
+
+# read-file and write-file
+(run-test (fn []
+  (def test-file "tmp/a/b/c/file.txt")
+  (def test-string "Hello world!")
+  (filesystem/write-file test-file test-string)
+  (aeq (string (filesystem/read-file test-file)) test-string)))
+
+# copy-file
+(run-test (fn []
+  (def src "tmp/a/b/c/src.txt")
+  (def dst "tmp/a/b/c/dst.txt")
+  (def test-string "Hello")
+  (filesystem/write-file src test-string)
+  (filesystem/copy-file src dst)
+  (aet (filesystem/exists? dst))
+  (aeq (string (filesystem/read-file dst)) test-string)))

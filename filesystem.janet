@@ -71,11 +71,12 @@
   (scan-directory dir (fn [file] (os/rm file)))
   (try (os/rm dir) ([err] nil)))
 
-(defn recreate-directory
-  "Remove the directory if it exists, then create it again."
+(defn recreate-directories
+  "Remove the directory recursively if it exists, then create it and all
+  directories along the path again."
   [dir]
   (remove-directories dir)
-  (os/mkdir dir))
+  (create-directories dir))
 
 # ------------------------------------------------------------------------------
 # Files.

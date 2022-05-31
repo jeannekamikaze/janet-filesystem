@@ -13,7 +13,7 @@ A library for working with the file system.
 (filesystem/list-all-files "some/directory")
 (filesystem/create-directories "creates/all/subdirectories")
 (filesystem/remove-directories "removes/the/directory/recursively")
-(filesystem/recreate-directory "removes/recursively/and/creates/again")
+(filesystem/recreate-directories "removes/recursively/and/creates/again")
 
 # Files
 
