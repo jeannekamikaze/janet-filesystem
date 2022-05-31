@@ -29,7 +29,7 @@ A library for working with the file system.
 ## Installation
 
 ```
-[sudo] jpm install https://github.com/jeannekamikaze/janet-filesystem.git
+[sudo] jpm install filesystem
 ```
 
 ## License
