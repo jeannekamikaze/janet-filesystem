@@ -88,9 +88,9 @@
   the file."
   [[binding path mode] & body]
   ~(do
-    (def parent-path (path/dirname ,path))
-    (when (and (not (exists? ,path)) (not (exists? parent-path)))
-      (create-directories parent-path))
+    (def parent-path (,path/dirname ,path))
+    (when (and (not (,exists? ,path)) (not (,exists? parent-path)))
+      (,create-directories parent-path))
     (def ,binding (file/open ,path ,mode))
     ,(apply defer [:close binding] body)))
 

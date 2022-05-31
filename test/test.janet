@@ -67,6 +67,12 @@
   (filesystem/recreate-directories test-dirs)
   (aet (filesystem/exists? test-dirs))))
 
+# with-file
+(run-test (fn []
+  (def test-file "tmp/a/b/c/foo.txt")
+  (filesystem/with-file [file test-file :wb]
+    (aet (filesystem/exists? test-file)))))
+
 # create-file
 (run-test (fn []
   (def new-test-file "tmp/files/new.txt")
