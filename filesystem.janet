@@ -18,8 +18,9 @@
   [path func]
   (def indices (string/find-all path/sep path))
   (each idx indices
-    (def subpath (string/slice path 0 idx))
-    (func subpath))
+    (if (not= idx 0)
+      (let [subpath (string/slice path 0 idx)]
+        (func subpath))))
   (func path))
 
 # ------------------------------------------------------------------------------
