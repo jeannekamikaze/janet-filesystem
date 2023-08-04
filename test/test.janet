@@ -47,6 +47,14 @@
   (aeq (filesystem/list-all-files "tmp/files/")
       @["tmp/files/subdir/world.txt" "tmp/files/hello.txt"])))
 
+# list-all-files with absolute paths
+(run-test (fn []
+  (def abs-files (path/abspath "tmp/files/"))
+  (filesystem/create-file "tmp/files/hello.txt")
+  (filesystem/create-file "tmp/files/subdir/world.txt")
+  (aeq (filesystem/list-all-files abs-files)
+      @[(path/join abs-files "subdir/world.txt") (path/join abs-files "hello.txt")])))
+
 # create-directories
 (run-test (fn []
   (def test-dirs "tmp/a/b/c")
@@ -90,6 +98,16 @@
 (run-test (fn []
   (def src "tmp/a/b/c/src.txt")
   (def dst "tmp/a/b/c/dst.txt")
+  (def test-string "Hello")
+  (filesystem/write-file src test-string)
+  (filesystem/copy-file src dst)
+  (aet (filesystem/exists? dst))
+  (aeq (string (filesystem/read-file dst)) test-string)))
+
+# copy-file with absolute paths
+(run-test (fn []
+  (def src (path/abspath "tmp/a/b/c/src.txt"))
+  (def dst (path/abspath "tmp/a/b/c/dst.txt"))
   (def test-string "Hello")
   (filesystem/write-file src test-string)
   (filesystem/copy-file src dst)
