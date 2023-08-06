@@ -1,11 +1,12 @@
 (import ../filesystem :as filesystem)
+(import path)
 
 (defn aeq
   "assert equal"
   [x y]
   (unless (deep= x y)
     (with-dyns [:out stderr]
-      (print "expected " x " to equal " y))
+      (printf "expected %m to equal %m" x y))
     (os/exit 1)))
 
 (defn aet
